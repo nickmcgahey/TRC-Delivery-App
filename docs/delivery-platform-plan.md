@@ -163,7 +163,7 @@ Ship PWA first if timeline is tight; native wraps the same backend.
 **TRC requirements to configure / extend via process + meta:**
 - Shift login tied to employee identity (in-house only)
 - Navigate via Google Maps / CanFleet routing
-- Checklist: arrive → verify recipient ≥19 (ID if appears &lt;25) → capture ID type/last4 or photo per legal advice → signature + optional photo → mark delivered / failed-return
+- Checklist: arrive → verify recipient ≥19 (ID if appears under 25) → capture ID type/last4 or photo per legal advice → signature + optional photo → mark delivered / failed-return
 - Cannot mark delivered outside geofence of order address (configurable radius)
 - Failed delivery → “return to store” task same day
 
@@ -190,7 +190,7 @@ Ship PWA first if timeline is tight; native wraps the same backend.
 | Stage | Control |
 |---|---|
 | Entry | Soft gate: confirm 19+; block under-age; cookie/account flag |
-| Account / checkout | Required DOB; reject if &lt;19; re-check on birthday edge cases |
+| Account / checkout | Required DOB; reject if under 19; re-check on birthday edge cases |
 | Platform chrome | Ontario retail seal + CRSA block on every storefront surface |
 | Doorstep | Driver POD: visual age estimate; mandatory ID inspection if appears under 25; capture verification outcome (pass/fail/reason) |
 | Audit | Immutable delivery verification event log |
