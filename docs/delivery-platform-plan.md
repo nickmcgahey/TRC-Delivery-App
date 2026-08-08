@@ -4,7 +4,8 @@
 **Repo:** `TRC-Delivery-App` (greenfield)  
 **System of record today:** [trcannabis.ca](https://trcannabis.ca) — WordPress + WooCommerce 10.9 + Breadstack (`deepknead`) on Cloudways  
 **Stores:** Oshawa (live pickup/curbside), Monaghan (catalog location present; storefront incomplete)  
-**Architecture decision:** **Hybrid** (locked) — CanFleet for fleet/dispatch/POD; TRC-built customer apps + compliance gateway; Woo/Breadstack remains commerce SoR. Full custom fleet deferred to Phase 3 only if CanFleet gaps block ops.
+**Architecture decision:** **Hybrid** (locked) — CanFleet for fleet/dispatch/POD; TRC-built customer apps + compliance gateway; Woo/Breadstack remains commerce SoR. Full custom fleet deferred to Phase 3 only if CanFleet gaps block ops.  
+**Payments decision:** **BlazePay** (locked) — primary processor; Payfirma/`betpg` remain fallbacks if already configured; Stripe out of scope.
 
 This plan defines how a customer web/PWA + mobile app, driver app, and admin dispatch dashboard integrate with the existing retail inventory and order stack, while meeting Ontario AGCO delivery rules.
 
@@ -19,7 +20,7 @@ This plan defines how a customer web/PWA + mobile app, driver app, and admin dis
 | Layer | Approach |
 |---|---|
 | Catalog, cart, stock, taxes, tips | WooCommerce Store API + Breadstack location/warehouse model |
-| Payments | Keep cannabis-capable gateways already on site (BlazePay / Payfirma / `betpg`); treat “Stripe” as a payment-adapter target only if merchant eligibility is confirmed |
+| Payments | **BlazePay** (chosen); Payfirma/`betpg` as existing fallbacks only; Stripe explicitly out of scope |
 | Dispatch, driver app, GPS tracking, POD | Enable **Breadstack Delivery (CanFleet)** — plugin already connected (`bs-cf`) but delivery rates are not live at checkout |
 | Branded customer ordering + tracking | New PWA / React Native app in this repo |
 | Admin dispatch UX | CanFleet dispatch first; optional custom dashboard later if branding/ops require it |
@@ -27,7 +28,7 @@ This plan defines how a customer web/PWA + mobile app, driver app, and admin dis
 
 **Why not a full custom fleet stack first?** CanFleet already covers driver assignment, GPS, ETA, notifications, and proof-of-delivery. Rebuilding that while also shipping a customer app doubles scope and compliance risk. Custom dispatch remains a Phase 3 option if CanFleet gaps block operations.
 
-**Why not Stripe as the primary processor?** Active checkout methods on the live site are cannabis-oriented (`breadstack-blazepay`, `breadstack-merrco-payfirma`, `betpg`, `cod`). Stripe commonly declines or restricts cannabis merchants. Plan for a **Payment Provider interface** with BlazePay/Payfirma as default; add Stripe only after legal/ops confirmation (or for non-cannabis SKUs if ever split).
+**Payments:** Stakeholder chose **BlazePay**. Do not integrate Stripe. Keep a thin payment adapter so Payfirma/`betpg` can still settle existing orders if those gateways remain enabled on the store, but all new delivery checkout work targets BlazePay.
 
 ---
 
@@ -387,7 +388,7 @@ TRC-Delivery-App/
 
 | Item | Risk | Decision needed |
 |---|---|---|
-| Stripe | Likely unavailable for cannabis | Confirm with Stripe/counsel; else drop from MVP messaging |
+| Stripe | Out of scope (BlazePay chosen) | No action |
 | CanFleet fit | Plugin connected but delivery not selling | Validate feature gaps with Breadstack before custom fleet work |
 | WP not in git | Hard to review theme/plugin changes | Export critical theme/plugin code or document WP change runbook |
 | Monaghan readiness | Selector/page incomplete | Do not advertise until stock + UX verified |
@@ -416,8 +417,23 @@ TRC-Delivery-App/
 3. **Phase 0 config** on staging: enable CanFleet delivery shipping, one Oshawa zone + fees, Maps key, test employee-driver.  
 4. **Scaffold monorepo** in this repo (`apps/customer-web` + `packages/api` + `woo-client` + `canfleet-client`).  
 5. **Implement Compliance quote** (grams + zone fee) against Store API cart.  
-6. **Payment adapter spike** on BlazePay/Payfirma; Stripe spike only if approved.  
-7. **Remaining stakeholder decisions:** Stripe eligibility; provide staging credentials/access for Phase 0.
+6. **Payment adapter spike** on BlazePay (sandbox/test mode).  
+7. **Remaining:** provide staging credentials/access for Phase 0 (see below).
+
+### What “staging access” means
+
+Staging is a **non-production copy** of the store (or sandbox credentials) so we can wire delivery, payments, and apps without touching live customers or real charges.
+
+| Access item | What it is | Why we need it |
+|---|---|---|
+| Staging WP admin | Login to a staging WordPress/Woo site (or carefully scoped staging clone of trcannabis.ca) | Turn on CanFleet delivery shipping, zones, test products/orders |
+| WC REST keys | WooCommerce API keys (read/write) for that staging site | Let the TRC API create/read orders, customers, stock |
+| CanFleet / Breadstack Delivery admin | Login to dispatch so we can add a test driver, hours, auto-assign | Validate driver app + task flow end-to-end |
+| BlazePay sandbox | Test merchant keys / test cards from Breadstack BlazePay | Run checkout without real money |
+| Google Maps keys | Places + Maps JS/SDK keys (HTTP-referrer / app restricted) | Address autocomplete, zone map, customer tracking map |
+| Webhook endpoint allowlist | Ability for Woo/CanFleet to call our staging API URLs | Order paid → create delivery task; status sync |
+
+If you do not have a separate staging site yet, the minimum alternative is: **sandbox payment keys + a Woo staging clone on Cloudways** (most Cloudways plans can clone the live app). We should not use production admin keys or live BlazePay keys for initial build/test.
 
 ---
 
