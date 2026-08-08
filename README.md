@@ -16,4 +16,4 @@ See **[docs/delivery-platform-plan.md](./docs/delivery-platform-plan.md)** for t
 
 ## Status
 
-Greenfield repository. Commerce system of record remains WordPress + WooCommerce + Breadstack; this repo will host the delivery clients and API gateway described in the plan.
+Greenfield repository. **Architecture: Hybrid (chosen)** — CanFleet for drivers/dispatch/POD; this repo for customer PWA/mobile, compliance/pricing gateway, and later admin polish. Commerce SoR remains WordPress + WooCommerce + Breadstack.

@@ -3,7 +3,8 @@
 **Product:** Twisted Roots Cannabis (TRC) same-day delivery  
 **Repo:** `TRC-Delivery-App` (greenfield)  
 **System of record today:** [trcannabis.ca](https://trcannabis.ca) — WordPress + WooCommerce 10.9 + Breadstack (`deepknead`) on Cloudways  
-**Stores:** Oshawa (live pickup/curbside), Monaghan (catalog location present; storefront incomplete)
+**Stores:** Oshawa (live pickup/curbside), Monaghan (catalog location present; storefront incomplete)  
+**Architecture decision:** **Hybrid** (locked) — CanFleet for fleet/dispatch/POD; TRC-built customer apps + compliance gateway; Woo/Breadstack remains commerce SoR. Full custom fleet deferred to Phase 3 only if CanFleet gaps block ops.
 
 This plan defines how a customer web/PWA + mobile app, driver app, and admin dispatch dashboard integrate with the existing retail inventory and order stack, while meeting Ontario AGCO delivery rules.
 
@@ -13,7 +14,7 @@ This plan defines how a customer web/PWA + mobile app, driver app, and admin dis
 
 **Do not rebuild commerce from scratch.** Keep WooCommerce/Breadstack as the inventory and order system of record. Build (or wrap) delivery UX in this repo around that core.
 
-**Preferred path: Hybrid (configure + wrap)**
+**Chosen path: Hybrid (configure + wrap)** — stakeholder-approved.
 
 | Layer | Approach |
 |---|---|
@@ -410,12 +411,13 @@ TRC-Delivery-App/
 
 ## 13. Immediate next actions
 
-1. **Stakeholder decision:** Hybrid (recommended) vs full custom fleet.  
+1. ~~**Stakeholder decision:** Hybrid vs full custom fleet.~~ **Done — Hybrid chosen.**  
 2. **Access:** Staging WP admin, WC REST keys, CanFleet admin, gateway sandbox, Google Cloud project.  
-3. **Phase 0 config** on staging: delivery method, one Oshawa zone, Maps key, test driver.  
-4. **Scaffold monorepo** in this repo (`apps/customer-web` + `packages/api` + `woo-client`).  
+3. **Phase 0 config** on staging: enable CanFleet delivery shipping, one Oshawa zone + fees, Maps key, test employee-driver.  
+4. **Scaffold monorepo** in this repo (`apps/customer-web` + `packages/api` + `woo-client` + `canfleet-client`).  
 5. **Implement Compliance quote** (grams + zone fee) against Store API cart.  
-6. **Payment adapter spike** on BlazePay/Payfirma; Stripe spike only if approved.
+6. **Payment adapter spike** on BlazePay/Payfirma; Stripe spike only if approved.  
+7. **Remaining stakeholder decisions:** Stripe eligibility; provide staging credentials/access for Phase 0.
 
 ---
 
