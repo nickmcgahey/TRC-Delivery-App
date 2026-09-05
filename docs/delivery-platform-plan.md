@@ -3,6 +3,7 @@
 **Product:** Twisted Roots Cannabis (TRC) same-day delivery  
 **Repo:** `TRC-Delivery-App` (greenfield)  
 **System of record today:** [trcannabis.ca](https://trcannabis.ca) — WordPress + WooCommerce 10.9 + Breadstack (`deepknead`) on Cloudways  
+**Staging:** [https://wordpress-1668181-6656169.cloudwaysapps.com](https://wordpress-1668181-6656169.cloudwaysapps.com) (Cloudways clone; `noindex`) — **WP is up, but WooCommerce / Breadstack / CanFleet REST namespaces are not exposed yet** (likely plugins inactive or clone incomplete)  
 **Stores:** Oshawa (live pickup/curbside), Monaghan (catalog location present; storefront incomplete)  
 **Architecture decision:** **Hybrid** (locked) — CanFleet for fleet/dispatch/POD; TRC-built customer apps + compliance gateway; Woo/Breadstack remains commerce SoR. Full custom fleet deferred to Phase 3 only if CanFleet gaps block ops.  
 **Payments decision:** **BlazePay** (locked) — primary processor; Payfirma/`betpg` remain fallbacks if already configured; Stripe out of scope.
@@ -414,41 +415,49 @@ TRC-Delivery-App/
 
 1. ~~**Stakeholder decision:** Hybrid vs full custom fleet.~~ **Done — Hybrid chosen.**  
 2. ~~**Payments:**~~ **Done — BlazePay; Stripe out of scope.**  
-3. ~~**Staging WordPress clone:**~~ **Done — owner has staging WP access to test against.**  
-4. **From staging WP (not Cloudways):** confirm Administrator (or equivalent) role → create WooCommerce REST API keys; confirm CanFleet delivery can be enabled; BlazePay test/sandbox mode; add Google Maps key if empty.  
-5. **Phase 0 config** on staging: enable CanFleet delivery shipping, one Oshawa zone + fees, Maps key, test employee-driver.  
-6. **Scaffold monorepo** in this repo (`apps/customer-web` + `packages/api` + `woo-client` + `canfleet-client`).  
-7. **Implement Compliance quote** (grams + zone fee) against Store API cart.  
-8. **Payment adapter spike** on BlazePay (sandbox/test mode).  
-9. **Cloudways:** optional for app build — only needed later for hosting ops (re-clone, DNS/SSL, server logs, PHP/stack tweaks).
+3. ~~**Staging WordPress clone:**~~ **Done — URL:** `https://wordpress-1668181-6656169.cloudwaysapps.com`  
+4. **Unblock staging commerce stack:** on that site, activate/restore **WooCommerce + Breadstack (`deepknead`) + CanFleet** (and related pickup plugins). Public REST currently only shows core WP namespaces — no `wc/*` or `bs-cf/*` routes. Ask Breadstack if the clone was meant to include plugins/data.  
+5. **Then from staging WP:** confirm Administrator role → create WooCommerce REST API keys; enable CanFleet delivery; BlazePay test/sandbox; Google Maps key.  
+6. **Phase 0 config** on staging: delivery shipping, one Oshawa zone + fees, test employee-driver.  
+7. **Scaffold monorepo** in this repo (`apps/customer-web` + `packages/api` + `woo-client` + `canfleet-client`).  
+8. **Implement Compliance quote** (grams + zone fee) against Store API cart.  
+9. **Payment adapter spike** on BlazePay (sandbox/test mode).  
+10. **Cloudways:** optional for app build — only needed later for hosting ops (re-clone, DNS/SSL, server logs, PHP/stack tweaks).
 
 ### Staging access — status
 
 | Access item | Needed for app testing? | Status |
 |---|---|---|
-| Staging WP admin | Yes | **Have it** |
-| WC REST keys (from staging WP) | Yes | Create in WooCommerce → Settings → Advanced → REST API |
-| CanFleet / Breadstack Delivery on staging | Yes | Configure in staging WP / Breadstack |
+| Staging WP URL | Yes | **Have it** — `https://wordpress-1668181-6656169.cloudwaysapps.com` |
+| Staging WP admin login | Yes | Owner has access |
+| WooCommerce + Breadstack on staging | Yes | **Blocked** — REST has no `wc` / `bs-*` namespaces yet |
+| WC REST keys (from staging WP) | Yes | After Woo is active: WooCommerce → Settings → Advanced → REST API |
+| CanFleet / Breadstack Delivery on staging | Yes | After plugins active |
 | BlazePay sandbox / test mode | Yes | Gateway settings on staging (avoid live charges) |
 | Google Maps keys | Yes | Google Cloud Console (not Cloudways) |
 | Cloudways panel | No for app API work | Nice-to-have for clone/DNS/SSL/server ops only |
 | Webhooks to TRC API | When API is deployed | Configure from WP once staging API URL exists |
 
-**Cloudways is not required** to start building/testing the delivery app against the staging clone, as long as staging WP can create REST keys and change plugin/shipping settings. Prefer an **Administrator** (or Breadstack-assisted) role on staging — Shop Manager alone often cannot create API keys or enable delivery modules.
+**Cloudways is not required** to start building/testing once staging has Woo/Breadstack healthy. Prefer an **Administrator** role on staging — Shop Manager alone often cannot create API keys or enable delivery modules.
 
 ---
 
-## Appendix A — Key live endpoints (integration cheat sheet)
+## Appendix A — Key endpoints (integration cheat sheet)
 
-| Purpose | Endpoint |
-|---|---|
-| Catalog | `GET /wp-json/wc/store/v1/products` |
-| Cart | `/wp-json/wc/store/v1/cart/*` |
-| Checkout | `POST /wp-json/wc/store/v1/checkout` |
-| Admin orders/products | `/wp-json/wc/v3/*` (auth) |
-| CanFleet | `/wp-json/bs-cf/*` |
-| Local/curbside pickup | `/wp-json/bs-localpickup/*`, `/wp-json/bs-curbsidepickup/*` |
-| Location AJAX | `bs_set_shipping_method`, `bs_location_*` via `admin-ajax.php` |
+Use the **staging** host while building; production host only for live cutover.
+
+| Purpose | Staging | Production |
+|---|---|---|
+| Site | `https://wordpress-1668181-6656169.cloudwaysapps.com` | `https://trcannabis.ca` |
+| Catalog | `GET /wp-json/wc/store/v1/products` | same path |
+| Cart | `/wp-json/wc/store/v1/cart/*` | same path |
+| Checkout | `POST /wp-json/wc/store/v1/checkout` | same path |
+| Admin orders/products | `/wp-json/wc/v3/*` (auth) | same path |
+| CanFleet | `/wp-json/bs-cf/*` | same path |
+| Local/curbside pickup | `/wp-json/bs-localpickup/*`, `/wp-json/bs-curbsidepickup/*` | same path |
+| Location AJAX | `bs_set_shipping_method`, `bs_location_*` via `admin-ajax.php` | same path |
+
+**Note (2026-09-05):** Staging currently exposes only core WP REST namespaces. Until WooCommerce/Breadstack are active on the clone, the `wc/*` and `bs-*` rows above will 404.
 
 ## Appendix B — Equivalent gram reference (public possession)
 
