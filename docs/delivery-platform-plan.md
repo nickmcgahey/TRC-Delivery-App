@@ -413,27 +413,28 @@ TRC-Delivery-App/
 ## 13. Immediate next actions
 
 1. ~~**Stakeholder decision:** Hybrid vs full custom fleet.~~ **Done — Hybrid chosen.**  
-2. **Access:** Staging WP admin, WC REST keys, CanFleet admin, gateway sandbox, Google Cloud project.  
-3. **Phase 0 config** on staging: enable CanFleet delivery shipping, one Oshawa zone + fees, Maps key, test employee-driver.  
-4. **Scaffold monorepo** in this repo (`apps/customer-web` + `packages/api` + `woo-client` + `canfleet-client`).  
-5. **Implement Compliance quote** (grams + zone fee) against Store API cart.  
-6. **Payment adapter spike** on BlazePay (sandbox/test mode).  
-7. **Remaining:** provide staging credentials/access for Phase 0 (see below).
+2. ~~**Payments:**~~ **Done — BlazePay; Stripe out of scope.**  
+3. ~~**Staging WordPress clone:**~~ **Done — owner has staging WP access to test against.**  
+4. **From staging WP (not Cloudways):** confirm Administrator (or equivalent) role → create WooCommerce REST API keys; confirm CanFleet delivery can be enabled; BlazePay test/sandbox mode; add Google Maps key if empty.  
+5. **Phase 0 config** on staging: enable CanFleet delivery shipping, one Oshawa zone + fees, Maps key, test employee-driver.  
+6. **Scaffold monorepo** in this repo (`apps/customer-web` + `packages/api` + `woo-client` + `canfleet-client`).  
+7. **Implement Compliance quote** (grams + zone fee) against Store API cart.  
+8. **Payment adapter spike** on BlazePay (sandbox/test mode).  
+9. **Cloudways:** optional for app build — only needed later for hosting ops (re-clone, DNS/SSL, server logs, PHP/stack tweaks).
 
-### What “staging access” means
+### Staging access — status
 
-Staging is a **non-production copy** of the store (or sandbox credentials) so we can wire delivery, payments, and apps without touching live customers or real charges.
-
-| Access item | What it is | Why we need it |
+| Access item | Needed for app testing? | Status |
 |---|---|---|
-| Staging WP admin | Login to a staging WordPress/Woo site (or carefully scoped staging clone of trcannabis.ca) | Turn on CanFleet delivery shipping, zones, test products/orders |
-| WC REST keys | WooCommerce API keys (read/write) for that staging site | Let the TRC API create/read orders, customers, stock |
-| CanFleet / Breadstack Delivery admin | Login to dispatch so we can add a test driver, hours, auto-assign | Validate driver app + task flow end-to-end |
-| BlazePay sandbox | Test merchant keys / test cards from Breadstack BlazePay | Run checkout without real money |
-| Google Maps keys | Places + Maps JS/SDK keys (HTTP-referrer / app restricted) | Address autocomplete, zone map, customer tracking map |
-| Webhook endpoint allowlist | Ability for Woo/CanFleet to call our staging API URLs | Order paid → create delivery task; status sync |
+| Staging WP admin | Yes | **Have it** |
+| WC REST keys (from staging WP) | Yes | Create in WooCommerce → Settings → Advanced → REST API |
+| CanFleet / Breadstack Delivery on staging | Yes | Configure in staging WP / Breadstack |
+| BlazePay sandbox / test mode | Yes | Gateway settings on staging (avoid live charges) |
+| Google Maps keys | Yes | Google Cloud Console (not Cloudways) |
+| Cloudways panel | No for app API work | Nice-to-have for clone/DNS/SSL/server ops only |
+| Webhooks to TRC API | When API is deployed | Configure from WP once staging API URL exists |
 
-If you do not have a separate staging site yet, the minimum alternative is: **sandbox payment keys + a Woo staging clone on Cloudways** (most Cloudways plans can clone the live app). We should not use production admin keys or live BlazePay keys for initial build/test.
+**Cloudways is not required** to start building/testing the delivery app against the staging clone, as long as staging WP can create REST keys and change plugin/shipping settings. Prefer an **Administrator** (or Breadstack-assisted) role on staging — Shop Manager alone often cannot create API keys or enable delivery modules.
 
 ---
 
