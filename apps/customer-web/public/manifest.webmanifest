@@ -1,0 +1,31 @@
+{
+  "name": "Twisted Roots Cannabis",
+  "short_name": "Twisted Roots",
+  "description": "Sample delivery prototype for Twisted Roots Cannabis. Not the live store.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#f4efe6",
+  "theme_color": "#24382c",
+  "lang": "en-CA",
+  "icons": [
+    {
+      "src": "/icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ]
+}
