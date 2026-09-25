@@ -50,6 +50,8 @@ npm run dev
 
 Open [http://localhost:3000](http://localhost:3000). Confirm you are 19 or older to enter. **Reset sample session** on the home screen clears the prototype data stored in this browser.
 
+`npm run dev` skips the preview password when `PREVIEW_PASSWORD` is unset. A production build stays closed until that variable is set. Do not commit a password. Hosting a private phone link on Vercel Hobby is described in [apps/customer-web/DEPLOY.md](./apps/customer-web/DEPLOY.md).
+
 To build and run the production server:
 
 ```bash

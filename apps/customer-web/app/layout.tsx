@@ -1,6 +1,5 @@
 import type { Metadata, Viewport } from "next";
 import { Fraunces, Outfit } from "next/font/google";
-import { Providers } from "@/components/Providers";
 import "./globals.css";
 
 const serif = Fraunces({
@@ -23,19 +22,12 @@ export const metadata: Metadata = {
   description:
     "Sample delivery prototype for Twisted Roots Cannabis, an independent retailer in Oshawa, Ontario. Not the live store.",
   applicationName: "Twisted Roots Cannabis",
-  manifest: "/manifest.webmanifest",
-  robots: { index: false, follow: false },
-  appleWebApp: {
-    capable: true,
-    title: "Twisted Roots",
-    statusBarStyle: "black-translucent",
-  },
-  icons: {
-    icon: [
-      { url: "/icons/icon-192.png", sizes: "192x192", type: "image/png" },
-      { url: "/icons/icon-512.png", sizes: "512x512", type: "image/png" },
-    ],
-    apple: [{ url: "/icons/icon-192.png", sizes: "192x192" }],
+  robots: {
+    index: false,
+    follow: false,
+    nocache: true,
+    noarchive: true,
+    googleBot: { index: false, follow: false, noimageindex: true },
   },
 };
 
@@ -48,12 +40,7 @@ export const viewport: Viewport = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en-CA" className={`${serif.variable} ${sans.variable}`}>
-      <body>
-        <Providers>{children}</Providers>
-        <noscript>
-          <p className="noscript">This prototype needs JavaScript.</p>
-        </noscript>
-      </body>
+      <body>{children}</body>
     </html>
   );
 }

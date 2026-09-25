@@ -10,3 +10,5 @@ npm run dev
 ```
 
 Open http://localhost:3000. Full notes are in the repository root README.
+
+`npm run dev` is open when `PREVIEW_PASSWORD` is unset. Production stays closed without it. See [DEPLOY.md](./DEPLOY.md) for the Vercel Hobby link.
